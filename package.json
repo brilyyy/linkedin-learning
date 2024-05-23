@@ -1,0 +1,21 @@
+{
+  "name": "linkedin-learning",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "bun run index.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/turndown": "^5.0.4"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "docx": "^8.5.0",
+    "html-to-md": "^0.8.5",
+    "puppeteer": "^22.9.0",
+    "turndown": "^7.2.0"
+  }
+}
