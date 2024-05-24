@@ -42,17 +42,17 @@ async function waitForVideoEnd(page: Page) {
 async function main() {
   const browser = await puppeteer.connect({
     browserWSEndpoint:
-      "ws://127.0.0.1:9222/devtools/browser/248c3613-78ab-420d-8f70-a4d3a46a1a38",
+      "ws://127.0.0.1:9222/devtools/browser/069d67af-1e9f-4eb8-8be8-ba9256a6637f",
     defaultViewport: null,
   });
   const page = await browser.newPage();
 
   const courses = [
-    "https://www.linkedin.com/learning/business-etiquette-for-the-modern-workplace",
-    "https://www.linkedin.com/learning/creating-great-first-impressions",
-    "https://www.linkedin.com/learning/body-language-essentials-for-the-working-professional",
-    "https://www.linkedin.com/learning/communication-foundations-2018-2",
-    "https://www.linkedin.com/learning/communicating-with-confidence-2015",
+    // "https://www.linkedin.com/learning/business-etiquette-for-the-modern-workplace",
+    // "https://www.linkedin.com/learning/creating-great-first-impressions",
+    // "https://www.linkedin.com/learning/body-language-essentials-for-the-working-professional",
+    // "https://www.linkedin.com/learning/communication-foundations-2018-2",
+    // "https://www.linkedin.com/learning/communicating-with-confidence-2015",
     "https://www.linkedin.com/learning/confident-communication-for-introverts",
   ];
 
@@ -60,7 +60,7 @@ async function main() {
     console.log(course);
 
     await page.goto(course, {
-      waitUntil: "domcontentloaded",
+      waitUntil: "load",
     });
 
     const collapsedElements = await page.$$(
@@ -97,8 +97,11 @@ async function main() {
 
       const baseUrl = "https://www.linkedin.com";
       await page.goto(`${baseUrl}${link}`, {
-        waitUntil: "domcontentloaded",
+        waitUntil: "load",
       });
+
+      // tunggu button transkrip muncul
+      await sleep(2000);
 
       const button = await page.waitForSelector(
         '[data-live-test-classroom-layout-tab="TRANSCRIPT"]'
@@ -134,7 +137,10 @@ async function main() {
 
     Packer.toBuffer(doc).then((buffer) => {
       fs.writeFileSync(
-        `${course.replace("https://www.linkedin.com/learning/", "")}.docx`,
+        `./document/${course.replace(
+          "https://www.linkedin.com/learning/",
+          ""
+        )}.docx`,
         buffer
       );
     });
