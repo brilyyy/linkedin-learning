@@ -1,15 +1,22 @@
-# linkedin-learning
+# LLearning
 
-To install dependencies:
+Download sesuai OS yang digunakan
 
-```bash
-bun install
+masukan data ke options.json
+
+hostURL: host socket chrome
+
+courses: link kursus
+
+```json
+{
+"hostURL": "xxxxxx",
+"courses": ["a", "b", "c"]
+}
 ```
 
-To run:
+Jalankan
 
-```bash
-bun run index.ts
+```json
+./llearn run options.json
 ```
-
-This project was created using `bun init` in bun v1.1.8. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
