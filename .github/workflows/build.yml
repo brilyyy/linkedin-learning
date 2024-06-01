@@ -1,0 +1,72 @@
+name: Build and Release CLI App
+
+on:
+  push:
+    branches:
+      - main # Or your preferred branch
+
+jobs:
+  build:
+    runs-on: ubuntu-latest # Choose your preferred runner OS
+    strategy:
+      matrix:
+        os: [linux, macos, windows]
+        arch: [x64, arm64] # Add more architectures if needed
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "18" # Or your preferred version
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Build TypeScript Code
+        run: npm run build
+
+      - name: Compile with pkg
+        run: |
+          npm install -g pkg@latest
+          pkg . --targets node18-${{ matrix.os }}-${{ matrix.arch }} --public --output ./build/linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
+        env:
+          PKG_CACHE_PATH: /tmp/pkg-cache # Optionally, cache pkg for faster builds
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
+          path: dist/linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          path: build
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.get_version.outputs.current-version }}
+          release_name: Release v${{ steps.get_version.outputs.current-version }}
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Assets
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./dist/linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
+          asset_name: linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
+          asset_content_type: application/octet-stream
