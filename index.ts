@@ -1,7 +1,17 @@
-import puppeteer, { Page } from "puppeteer";
+#!/usr/bin/env ts-node
+
+import puppeteer, { Page } from "puppeteer-core";
 import html2md from "html-to-md";
 import { Document, Packer, Paragraph } from "docx";
 import * as fs from "fs";
+import { Command } from "commander";
+
+type TData = {
+  hostURL: string;
+  courses: string[];
+};
+
+const program = new Command();
 
 async function sleep(durationMs: number): Promise<void> {
   let remainingTime = durationMs;
@@ -39,20 +49,22 @@ async function waitForVideoEnd(page: Page) {
   console.log("Video finished playing!");
 }
 
-async function main() {
+program.version("1.0.0").description("linkedin learning kok manual");
+
+program.command("run <filename>").action(async (filename) => {
+  const rawData = fs.readFileSync(filename, "utf8");
+  const jsonData = JSON.parse(rawData) as TData;
+  const browser = await puppeteer.connect({
+    browserWSEndpoint: jsonData.hostURL,
+    defaultViewport: null,
+  });
+
   try {
-    const browser = await puppeteer.connect({
-      browserWSEndpoint:
-        "ws://127.0.0.1:9222/devtools/browser/7f3aeb93-7372-48a7-ac94-70fe0007a18c",
-      defaultViewport: null,
-    });
+    if (jsonData.courses.length < 1) throw new Error("Courses link empty");
+
     const page = await browser.newPage();
 
-    const courses = [
-      "https://www.linkedin.com/learning/learning-design-thinking-lead-change-in-your-organization",
-      "https://www.linkedin.com/learning/problem-solving-techniques",
-      "https://www.linkedin.com/learning/critical-thinking-and-problem-solving",
-    ];
+    const courses = jsonData.courses;
 
     for (const course of courses) {
       console.log(course);
@@ -98,7 +110,6 @@ async function main() {
           waitUntil: "load",
         });
 
-        // tunggu button transkrip muncul
         await sleep(2000);
 
         const button = await page.waitForSelector(
@@ -147,9 +158,9 @@ async function main() {
     }
   } catch (error) {
     console.log(error);
+  } finally {
+    await browser.close();
   }
-}
+});
 
-main()
-  .then()
-  .catch((e) => console.log(e));
+program.parse(process.argv);
