@@ -3,7 +3,8 @@
   "scripts": {
     "start": "ts-node-esm index.ts",
     "build": "tsup",
-    "build:exe": "tsup && pkg . --public --out-path build"
+    "build:exe": "tsup && pkg . --public --out-path build",
+    "dev": "tsup --watch"
   },
   "devDependencies": {
     "@types/node": "^20.13.0",
@@ -15,7 +16,6 @@
   },
   "dependencies": {
     "commander": "^12.1.0",
-    "docx": "^8.5.0",
     "html-to-md": "^0.8.5",
     "puppeteer-core": "^22.10.0"
   },
