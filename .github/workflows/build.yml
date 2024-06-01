@@ -39,7 +39,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
-          path: dist/linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
+          path: build/linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
 
   release:
     needs: build
@@ -67,6 +67,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
+          asset_path: ./build/linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
           asset_name: linkedin-learning-${{ matrix.os }}-${{ matrix.arch }}
           asset_content_type: application/octet-stream
