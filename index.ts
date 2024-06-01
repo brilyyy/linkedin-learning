@@ -118,6 +118,8 @@ program.command("run <filename>").action(async (filename) => {
 
         await button?.click();
 
+        await sleep(3000);
+
         const text = html2md(
           (await page.evaluate(() => {
             const container = document.querySelector(".classroom-transcript");

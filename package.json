@@ -6,6 +6,7 @@
     "build:exe": "tsup && pkg . --public --out-path build"
   },
   "devDependencies": {
+    "@types/node": "^20.13.0",
     "pkg": "^5.8.1",
     "tsup": "^8.0.2"
   },

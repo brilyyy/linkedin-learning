@@ -131,3 +131,5 @@ dist
 
 document/
 build/
+
+options.json
