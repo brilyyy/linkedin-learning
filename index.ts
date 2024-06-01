@@ -40,112 +40,116 @@ async function waitForVideoEnd(page: Page) {
 }
 
 async function main() {
-  const browser = await puppeteer.connect({
-    browserWSEndpoint:
-      "ws://127.0.0.1:9222/devtools/browser/069d67af-1e9f-4eb8-8be8-ba9256a6637f",
-    defaultViewport: null,
-  });
-  const page = await browser.newPage();
-
-  const courses = [
-    // "https://www.linkedin.com/learning/business-etiquette-for-the-modern-workplace",
-    // "https://www.linkedin.com/learning/creating-great-first-impressions",
-    // "https://www.linkedin.com/learning/body-language-essentials-for-the-working-professional",
-    // "https://www.linkedin.com/learning/communication-foundations-2018-2",
-    // "https://www.linkedin.com/learning/communicating-with-confidence-2015",
-    "https://www.linkedin.com/learning/confident-communication-for-introverts",
-  ];
-
-  for (const course of courses) {
-    console.log(course);
-
-    await page.goto(course, {
-      waitUntil: "load",
+  try {
+    const browser = await puppeteer.connect({
+      browserWSEndpoint:
+        "ws://127.0.0.1:9222/devtools/browser/7f3aeb93-7372-48a7-ac94-70fe0007a18c",
+      defaultViewport: null,
     });
+    const page = await browser.newPage();
 
-    const collapsedElements = await page.$$(
-      '.classroom-toc-section__toggle[aria-expanded="false"]'
-    );
+    const courses = [
+      "https://www.linkedin.com/learning/learning-design-thinking-lead-change-in-your-organization",
+      "https://www.linkedin.com/learning/problem-solving-techniques",
+      "https://www.linkedin.com/learning/critical-thinking-and-problem-solving",
+    ];
 
-    for (const element of collapsedElements) {
-      try {
-        await element.click();
-      } catch (error) {
-        console.error(`Error clicking element: ${error}`);
-      }
-    }
+    for (const course of courses) {
+      console.log(course);
 
-    const links = await page.evaluate(() =>
-      Array.from(document.querySelectorAll(".classroom-toc-item__link"), (e) =>
-        e.getAttribute("href")
-      )
-    );
-
-    console.log(links);
-
-    const transcripts = [];
-
-    const linksLength = links.length;
-
-    for (let i = 0; i < linksLength; i++) {
-      const link = links[i];
-      if (link?.includes("quiz")) {
-        continue;
-      }
-      console.log(link);
-
-      const baseUrl = "https://www.linkedin.com";
-      await page.goto(`${baseUrl}${link}`, {
+      await page.goto(course, {
         waitUntil: "load",
       });
 
-      // tunggu button transkrip muncul
-      await sleep(2000);
-
-      const button = await page.waitForSelector(
-        '[data-live-test-classroom-layout-tab="TRANSCRIPT"]'
+      const collapsedElements = await page.$$(
+        '.classroom-toc-section__toggle[aria-expanded="false"]'
       );
 
-      await button?.click();
-
-      const text = html2md(
-        (await page.evaluate(() => {
-          const container = document.querySelector(".classroom-transcript");
-          return container?.innerHTML;
-        })) || "",
-        {
-          skipTags: ["a"],
+      for (const element of collapsedElements) {
+        try {
+          await element.click();
+        } catch (error) {
+          console.error(`Error clicking element: ${error}`);
         }
+      }
+
+      const links = await page.evaluate(() =>
+        Array.from(
+          document.querySelectorAll(".classroom-toc-item__link"),
+          (e) => e.getAttribute("href")
+        )
       );
-      await sleep(10000);
-      console.log(text);
-      transcripts.push(text);
-      await waitForVideoEnd(page);
+
+      console.log(links);
+
+      const transcripts = [];
+
+      const linksLength = links.length;
+
+      for (let i = 0; i < linksLength; i++) {
+        const link = links[i];
+        if (link?.includes("quiz")) {
+          continue;
+        }
+        console.log(link);
+
+        const baseUrl = "https://www.linkedin.com";
+        await page.goto(`${baseUrl}${link}`, {
+          waitUntil: "load",
+        });
+
+        // tunggu button transkrip muncul
+        await sleep(2000);
+
+        const button = await page.waitForSelector(
+          '[data-live-test-classroom-layout-tab="TRANSCRIPT"]'
+        );
+
+        await button?.click();
+
+        const text = html2md(
+          (await page.evaluate(() => {
+            const container = document.querySelector(".classroom-transcript");
+            return container?.innerHTML;
+          })) || "",
+          {
+            skipTags: ["a"],
+          }
+        );
+        await sleep(10000);
+        console.log(text);
+        transcripts.push(text);
+        await waitForVideoEnd(page);
+      }
+
+      const doc = new Document({
+        sections: transcripts.map((text) => ({
+          properties: {},
+          children: [
+            new Paragraph({
+              text,
+            }),
+          ],
+        })),
+      });
+
+      Packer.toBuffer(doc).then((buffer) => {
+        fs.writeFileSync(
+          `./document/${course.replace(
+            "https://www.linkedin.com/learning/",
+            ""
+          )}.docx`,
+          buffer
+        );
+      });
+
+      console.log("Document Created");
     }
-
-    const doc = new Document({
-      sections: transcripts.map((text) => ({
-        properties: {},
-        children: [
-          new Paragraph({
-            text,
-          }),
-        ],
-      })),
-    });
-
-    Packer.toBuffer(doc).then((buffer) => {
-      fs.writeFileSync(
-        `./document/${course.replace(
-          "https://www.linkedin.com/learning/",
-          ""
-        )}.docx`,
-        buffer
-      );
-    });
-
-    console.log("Document Created");
+  } catch (error) {
+    console.log(error);
   }
 }
 
-main().then();
+main()
+  .then()
+  .catch((e) => console.log(e));
