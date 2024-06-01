@@ -72,7 +72,6 @@ async function main() {
         await element.click();
       } catch (error) {
         console.error(`Error clicking element: ${error}`);
-        // Handle the error (e.g., continue to the next element)
       }
     }
 
