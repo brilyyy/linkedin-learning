@@ -45,6 +45,21 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include: # Reconstruct the matrix based on the build artifacts
+          - os: linux
+            arch: x64
+          - os: linux
+            arch: arm64
+          - os: macos
+            arch: x64
+          - os: macos
+            arch: arm64
+          - os: windows
+            arch: x64
+          - os: windows
+            arch: arm64
     steps:
       - name: Download Build Artifacts
         uses: actions/download-artifact@v3
