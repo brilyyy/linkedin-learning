@@ -17,6 +17,6 @@ courses: link kursus
 
 Jalankan
 
-```json
+```bash
 ./llearn run options.json
 ```
